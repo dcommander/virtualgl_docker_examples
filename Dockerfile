@@ -3,6 +3,8 @@ FROM nvidia/opengl:1.0-glvnd-runtime-centos7
 ENV NVIDIA_DRIVER_CAPABILITIES ${NVIDIA_DRIVER_CAPABILITIES},graphics,compat32
 
 RUN yum-config-manager --add-repo https://virtualgl.org/pmwiki/uploads/Downloads/VirtualGL.repo \
+ && yum-config-manager --add-repo https://turbovnc.org/pmwiki/uploads/Downloads/TurboVNC.repo \
+ && yum -y install epel-release.noarch \
  && yum -y install \
     glx-utils \
     mesa-dri-drivers.x86_64 \
@@ -11,6 +13,9 @@ RUN yum-config-manager --add-repo https://virtualgl.org/pmwiki/uploads/Downloads
     xorg-x11-xauth \
     yum-utils \
     VirtualGL.x86_64 VirtualGL.i386 \
+    turbovnc \
+ && yum -y groupinstall "MATE Desktop" \
+ && sed -i 's/^# \$wm =.*/\$wm = \"mate-session\";/g' /etc/turbovncserver.conf \
  && yum clean all \
  && rm -rf /etc/ld.so.cache \
  && rm -rf /var/cache/ldconfig/* \
