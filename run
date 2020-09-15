@@ -1,0 +1,40 @@
+#!/bin/sh
+
+set -u
+set -e
+trap onexit INT
+trap onexit TERM
+trap onexit EXIT
+
+XAUTHFILE=
+
+onexit()
+{
+	if [ ! "$XAUTHFILE" = "" ]; then
+		rm -f $XAUTHFILE
+	fi
+}
+
+if [ -f /etc/opt/VirtualGL/vgl_xauth_key ]; then
+	xauth merge /etc/opt/VirtualGL/vgl_xauth_key
+fi
+XAUTHFILE=`mktemp ~/.Xauthority.XXXXXX`
+xauth nlist $DISPLAY :0.0 | sed -e 's/^..../ffff/' | xauth -f $XAUTHFILE nmerge -
+chmod 444 $XAUTHFILE
+
+. `dirname $0`/dockername
+echo
+echo vglrun /opt/VirtualGL/bin/glxspheres64
+echo and
+echo vglrun /opt/VirtualGL/bin/glxspheres
+echo should work in the following shell.
+echo
+docker run -it \
+	-e DISPLAY \
+	--gpus all \
+	--ipc host \
+	--rm \
+	-v $XAUTHFILE:/home/docker/.Xauthority \
+	-v /tmp/.X11-unix:/tmp/.X11-unix \
+	$USER/$IMAGE \
+	bash

@@ -1,0 +1,7 @@
+#!/bin/sh
+
+set -u
+set -e
+
+. `dirname $0`/dockername
+exec docker build -t $USER/$IMAGE .
