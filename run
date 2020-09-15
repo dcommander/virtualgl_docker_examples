@@ -15,21 +15,19 @@ onexit()
 	fi
 }
 
-if [ -f /etc/opt/VirtualGL/vgl_xauth_key ]; then
-	xauth merge /etc/opt/VirtualGL/vgl_xauth_key
-fi
 XAUTHFILE=`mktemp ~/.Xauthority.XXXXXX`
-xauth nlist $DISPLAY :0.0 | sed -e 's/^..../ffff/' | xauth -f $XAUTHFILE nmerge -
+xauth nlist $DISPLAY | sed -e 's/^..../ffff/' | xauth -f $XAUTHFILE nmerge -
 chmod 444 $XAUTHFILE
 
 . `dirname $0`/dockername
 echo
-echo vglrun /opt/VirtualGL/bin/glxspheres64
+echo vglrun -d /dev/dri/card0 /opt/VirtualGL/bin/glxspheres64
 echo and
-echo vglrun /opt/VirtualGL/bin/glxspheres
+echo vglrun -d /dev/dri/card0 /opt/VirtualGL/bin/glxspheres
 echo should work in the following shell.
 echo
 docker run -it \
+	--device=/dev/dri \
 	-e DISPLAY \
 	--gpus all \
 	--ipc host \
