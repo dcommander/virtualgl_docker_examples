@@ -2,37 +2,38 @@
 
 set -u
 set -e
-trap onexit INT
-trap onexit TERM
-trap onexit EXIT
-
-XAUTHFILE=
-
-onexit()
-{
-	if [ ! "$XAUTHFILE" = "" ]; then
-		rm -f $XAUTHFILE
-	fi
-}
-
-XAUTHFILE=`mktemp ~/.Xauthority.XXXXXX`
-xauth nlist $DISPLAY | sed -e 's/^..../ffff/' | xauth -f $XAUTHFILE nmerge -
-chmod 444 $XAUTHFILE
 
 . `dirname $0`/dockername
+CONTAINER_ID=$(docker run -it \
+	-d \
+	--device /dev/dri \
+	--expose 5901 \
+	--gpus all \
+	-P \
+	--rm \
+	$USER/$IMAGE \
+	/opt/TurboVNC/bin/vncserver -fg -autokill -otp -securitytypes tlsotp,otp)
+CONTAINER_NAME=$(docker ps --filter "id=$CONTAINER_ID" --format "{{.Names}}")
+echo
+echo Execute:
+echo docker stop $CONTAINER_NAME
+echo "to stop container (or log out of the window manager in the TurboVNC session.)"
+echo
+PORT=$(docker port $CONTAINER_NAME | cut -f2 -d:)
+echo VNC DISPLAY = `hostname`::$PORT
+OTP=
+while [ "$OTP" = "" ]; do
+	sleep 1
+	OTP=$(docker logs $CONTAINER_NAME | grep "Full control one-time password" | sed 's/.*: //g')
+done
+echo ONE-TIME PASSWORD = $OTP
+echo
+echo Execute:
+echo docker exec $CONTAINER_NAME /opt/TurboVNC/bin/vncpasswd -o -display :1
+echo to generate a new one-time password.
 echo
 echo vglrun -d /dev/dri/card0 /opt/VirtualGL/bin/glxspheres64
 echo and
 echo vglrun -d /dev/dri/card0 /opt/VirtualGL/bin/glxspheres
-echo should work in the following shell.
+echo should work in the TurboVNC session.
 echo
-docker run -it \
-	--device=/dev/dri \
-	-e DISPLAY \
-	--gpus all \
-	--ipc host \
-	--rm \
-	-v $XAUTHFILE:/home/docker/.Xauthority \
-	-v /tmp/.X11-unix:/tmp/.X11-unix \
-	$USER/$IMAGE \
-	bash
