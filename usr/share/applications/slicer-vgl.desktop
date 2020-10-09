@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=3D Slicer (GPU-accelerated)
+Comment=3D Slicer (GPU-accelerated)
+Exec=vglrun /opt/slicer/Slicer ${SLICER_ARGUMENTS}
+Terminal=false
+Type=Application
+Encoding=UTF-8
+Icon=/opt/slicer/slicer.png
+Categories=Utilities;

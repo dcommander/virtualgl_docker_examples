@@ -15,24 +15,32 @@ onexit()
 	fi
 }
 
+if [ -z ${VGL_DISPLAY+x} ]; then
+	export VGL_DISPLAY=/dev/dri/card0
+fi
 XAUTHFILE=`mktemp ~/.Xauthority.XXXXXX`
-xauth nlist $DISPLAY | sed -e 's/^..../ffff/' | xauth -f $XAUTHFILE nmerge -
+case $VGL_DISPLAY in
+*:*)
+	if [ -f /etc/opt/VirtualGL/vgl_xauth_key ]; then
+		xauth merge /etc/opt/VirtualGL/vgl_xauth_key
+	fi
+	xauth nlist $DISPLAY $VGL_DISPLAY | sed -e 's/^..../ffff/' | xauth -f $XAUTHFILE nmerge -
+	;;
+*)
+	xauth nlist $DISPLAY | sed -e 's/^..../ffff/' | xauth -f $XAUTHFILE nmerge -
+	;;
+esac
 chmod 444 $XAUTHFILE
 
 . `dirname $0`/dockername
-echo
-echo vglrun -d /dev/dri/card0 /opt/VirtualGL/bin/glxspheres64
-echo and
-echo vglrun -d /dev/dri/card0 /opt/VirtualGL/bin/glxspheres
-echo should work in the following shell.
-echo
-docker run -it \
+docker run \
 	--device=/dev/dri \
 	-e DISPLAY \
+	-e VGL_DISPLAY \
 	--gpus all \
 	--ipc host \
 	--rm \
 	-v $XAUTHFILE:/home/docker/.Xauthority \
 	-v /tmp/.X11-unix:/tmp/.X11-unix \
 	$USER/$IMAGE \
-	bash
+	openbox-session
