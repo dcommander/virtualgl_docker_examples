@@ -3,17 +3,38 @@
 set -u
 set -e
 
+if [ -z ${VGL_DISPLAY+x} ]; then
+	export VGL_DISPLAY=/dev/dri/card0
+	if [ ! -c /dev/dri/card0 ]; then
+		echo ERROR: /dev/dri/card0 does not exist.
+		exit 1
+	fi
+	if [ ! -r /dev/dri/card0 ]; then
+		echo ERROR: /dev/dri/card0 is not readable.
+		exit 1
+	fi
+	if [ ! -c /dev/dri/renderD128 ]; then
+		echo ERROR: /dev/dri/renderD128 does not exist.
+		exit 1
+	fi
+	if [ ! -r /dev/dri/renderD128 ]; then
+		echo ERROR: /dev/dri/renderD128 is not readable.
+		exit 1
+	fi
+fi
+
 . `dirname $0`/dockername
 CONTAINER_ID=$(docker run -it \
 	-d \
 	--device /dev/dri \
+	-e VGL_DISPLAY \
 	--expose 5801 \
 	--expose 5901 \
 	--gpus all \
 	-P \
 	--rm \
 	$USER/$IMAGE \
-	/opt/TurboVNC/bin/vncserver -fg -autokill -otp -securitytypes tlsotp,otp)
+	/opt/TurboVNC/bin/vncserver -fg -autokill -otp -vgl)
 CONTAINER_NAME=$(docker ps --filter "id=$CONTAINER_ID" --format "{{.Names}}")
 echo
 echo Execute:
@@ -29,14 +50,5 @@ while [ "$OTP" = "" ]; do
 	sleep 1
 	OTP=$(docker logs $CONTAINER_NAME | grep "Full control one-time password" | sed 's/.*: //g')
 done
-echo ONE-TIME PASSWORD = $OTP
-echo
-echo Execute:
-echo docker exec $CONTAINER_NAME /opt/TurboVNC/bin/vncpasswd -o -display :1
-echo to generate a new one-time password.
-echo
-echo vglrun -d /dev/dri/card0 /opt/VirtualGL/bin/glxspheres64
-echo and
-echo vglrun -d /dev/dri/card0 /opt/VirtualGL/bin/glxspheres
-echo should work in the TurboVNC session.
-echo
+echo SESSION PASSWORD = $OTP
+docker exec $CONTAINER_NAME sh -c "echo $OTP| /opt/TurboVNC/bin/vncpasswd -f >/home/docker/.vnc/passwd 2>/dev/null"
