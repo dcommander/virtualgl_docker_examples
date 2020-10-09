@@ -7,6 +7,7 @@ set -e
 CONTAINER_ID=$(docker run -it \
 	-d \
 	--device /dev/dri \
+	--expose 5801 \
 	--expose 5901 \
 	--gpus all \
 	-P \
@@ -19,8 +20,10 @@ echo Execute:
 echo docker stop $CONTAINER_NAME
 echo "to stop container (or log out of the window manager in the TurboVNC session.)"
 echo
-PORT=$(docker port $CONTAINER_NAME | cut -f2 -d:)
+PORT=$(docker port $CONTAINER_NAME 5901 | cut -f2 -d:)
+NOVNC_PORT=$(docker port $CONTAINER_NAME 5801 | cut -f2 -d:)
 echo VNC DISPLAY = `hostname`::$PORT
+echo "NOVNC URL = http://`hostname`:$NOVNC_PORT/vnc.html?host=`hostname`&port=$PORT&resize=remote"
 OTP=
 while [ "$OTP" = "" ]; do
 	sleep 1
