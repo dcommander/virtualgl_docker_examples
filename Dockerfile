@@ -6,9 +6,6 @@ RUN groupadd -g 1000 docker \
  && useradd -u 1000 -g 1000 -m docker -s /bin/bash \
  && usermod -a -G docker docker
 
-COPY etc/tint2 /etc/tint2
-RUN chmod 755 /etc/tint2 \
- && chmod 644 /etc/tint2/*
 COPY opt /opt
 RUN chmod 755 /opt \
  && chmod 755 /opt/slicer \
@@ -88,8 +85,11 @@ RUN apt -y update \
  && rm -rf /tmp/* \
  && rm -rf /var/tmp/*
 
-RUN LNUM=$(sed -n '/launcher_item_app/=' /etc/tint2/panel.tint2rc | head -1) && \
-  sed -i "${LNUM}ilauncher_item_app = /opt/slicer/slicer.desktop" /etc/tint2/panel.tint2rc
+RUN perl -i -p0e 's/  <separator \/>\n  <item label=\"Exit\">\n.*\n  <\/item>\n//s' /etc/xdg/openbox/menu.xml
+RUN perl -i -p0e 's/  <item label=\"ObConf\">\n[^\n]*\n  <\/item>\n//s' /etc/xdg/openbox/menu.xml
+RUN LNUM=$(sed -n '/launcher_item_app/=' /etc/xdg/tint2/tint2rc | head -1) && \
+  sed -i "${LNUM}ilauncher_item_app = /usr/share/applications/slicer.desktop" /etc/xdg/tint2/tint2rc && \
+  sed -i "/^launcher_item_app = tint2conf\.desktop$/d" /etc/xdg/tint2/tint2rc
 
 USER docker
 WORKDIR /home/docker

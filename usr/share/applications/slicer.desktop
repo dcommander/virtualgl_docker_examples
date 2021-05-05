@@ -1,5 +1,5 @@
 [Desktop Entry]
-Name=Slicer
+Name=3D Slicer
 Comment=3D Slicer
 Exec=/opt/slicer/Slicer ${SLICER_ARGUMENTS}
 Terminal=false
