@@ -27,9 +27,7 @@ RUN apt -y update \
     emacs-nox \
     firefox \
     libegl1-mesa \
-    libegl1-mesa:i386 \
     libglu1-mesa \
-    libglu1-mesa:i386 \
     libnss3 \
     libpulse-mainloop-glib0 \
     libxcb-icccm4 \
@@ -42,9 +40,7 @@ RUN apt -y update \
     libxcb-xkb1 \
     libxkbcommon-x11-0 \
     libxtst6 \
-    libxtst6:i386 \
     libxv1 \
-    libxv1:i386 \
     mate-terminal \
     openbox-menu \
     openssh-client \
@@ -55,7 +51,6 @@ RUN apt -y update \
     x11-xserver-utils \
     xauth \
  && wget https://s3.amazonaws.com/virtualgl-pr/dev/linux/virtualgl_2.6.80_amd64.deb \
- && wget https://s3.amazonaws.com/virtualgl-pr/dev/linux/virtualgl32_2.6.80_amd64.deb \
  && dpkg -i virtualgl*.deb \
  && rm *.deb \
  && apt install -f \
