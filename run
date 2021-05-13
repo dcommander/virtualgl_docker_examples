@@ -31,7 +31,7 @@ CONTAINER_ID=$(docker run -it \
 	--rm \
 	-v $XAUTHFILE:/etc/opt/VirtualGL/vgl_xauth_key \
 	-v /tmp/.X11-unix/X0:/tmp/.X11-unix/X0 \
-	$USER/$IMAGE \
+	$DOCKERUSER/$DOCKERIMAGE \
 	/opt/TurboVNC/bin/vncserver -fg -autokill -otp -securitytypes tlsotp,otp)
 CONTAINER_NAME=$(docker ps --filter "id=$CONTAINER_ID" --format "{{.Names}}")
 echo
