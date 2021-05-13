@@ -42,5 +42,5 @@ docker run \
 	--rm \
 	-v $XAUTHFILE:/home/docker/.Xauthority \
 	-v /tmp/.X11-unix:/tmp/.X11-unix \
-	$USER/$IMAGE \
+	$DOCKERUSER/$DOCKERIMAGE \
 	openbox-session
