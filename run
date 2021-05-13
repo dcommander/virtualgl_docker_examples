@@ -11,7 +11,7 @@ CONTAINER_ID=$(docker run -it \
 	--gpus all \
 	-P \
 	--rm \
-	$USER/$IMAGE \
+	$DOCKERUSER/$DOCKERIMAGE \
 	/opt/TurboVNC/bin/vncserver -fg -autokill -otp -securitytypes tlsotp,otp)
 CONTAINER_NAME=$(docker ps --filter "id=$CONTAINER_ID" --format "{{.Names}}")
 echo
