@@ -3,13 +3,13 @@
 set -u
 set -e
 
-USER=$(docker info 2>&1 | grep -e '^ Username: ' | sed -e 's/ Username: \(.*\)/\1/')
-if [ "$USER" = "" ]; then
+DOCKERUSER=$(docker info 2>&1 | grep -e '^ Username: ' | sed -e 's/ Username: \(.*\)/\1/')
+if [ "$DOCKERUSER" = "" ]; then
 	# Refer to
 	# https://stackoverflow.com/questions/29326721/is-there-a-way-to-get-the-docker-hub-username-of-the-current-user
-	USER=$(docker-credential-$(jq -r .credsStore ~/.docker/config.json) list | \
+	DOCKERUSER=$(docker-credential-$(jq -r .credsStore ~/.docker/config.json) list | \
 		jq -r '. | to_entries[] | select(.key | contains("docker.io")) | last(.value)')
-	if [ "$USER" = "" ]; then
+	if [ "$DOCKERUSER" = "" ]; then
 		echo "Could not obtain Docker username.  Run 'docker login' and try again."
 		exit 1
 	fi
@@ -17,9 +17,9 @@ fi
 
 DIR=`dirname $0`
 pushd $DIR >/dev/null 2>&1
-IMAGE=`git branch 2>/dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/\1/' -e 's/-/:/g'`
+DOCKERIMAGE=`git branch 2>/dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/\1/' -e 's/-/:/g'`
 popd >/dev/null 2>&1
-if [ "$IMAGE" = "" ]; then
+if [ "$DOCKERIMAGE" = "" ]; then
 	echo Could not obtain Docker image name.
 	exit 1
 fi
